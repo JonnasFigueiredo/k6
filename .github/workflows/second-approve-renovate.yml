@@ -1,0 +1,20 @@
+name: Second approval for Renovate
+on:
+  pull_request_review:
+    types: [submitted]
+
+permissions: {}
+
+jobs:
+  approve:
+    if: >
+      github.event.review.state == 'approved' &&
+      github.event.review.user.login == 'k6-core-bot[bot]' &&
+      github.event.pull_request.user.login == 'renovate-sh-app[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: hmarr/auto-approve-action@f0939ea97e9205ef24d872e76833fa908a770363 # v4.0.0
+        with:
+          pull-request-number: ${{ github.event.pull_request.number }}
