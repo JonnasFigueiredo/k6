@@ -1,3 +1,6 @@
+// Package event contains types necessary to interact with the event system
+// used to notify external components of various internal events during test
+// execution.
 package event
 
 // Type represents the different event types emitted by k6.
@@ -20,13 +23,21 @@ const (
 	Exit
 )
 
-//nolint:gochecknoglobals
-var (
-	// GlobalEvents are emitted once per test run.
-	GlobalEvents = []Type{Init, TestStart, TestEnd, Exit}
-	// VUEvents are emitted multiple times per each VU.
-	VUEvents = []Type{IterStart, IterEnd}
-)
+// Event is the emitted object sent to all subscribers of its type.
+// The subscriber should call its Done method when finished processing
+// to notify the emitter, though this is not required for all events.
+type Event struct {
+	Type Type
+	Data any
+	Done func()
+}
+
+// Subscriber is a limited interface of System that only allows subscribing and
+// unsubscribing.
+type Subscriber interface {
+	Subscribe(events ...Type) (subID uint64, eventsCh <-chan *Event)
+	Unsubscribe(subID uint64)
+}
 
 // ExitData is the data sent in the Exit event. Error is the error returned by
 // the run command.
